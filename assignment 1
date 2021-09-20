@@ -1,0 +1,104 @@
+
+This is the first assignment for the Coursera course "Advanced Machine Learning and Signal Processing"
+
+Just execute all cells one after the other and you are done - just note that in the last one you have to update your email address (the one you've used for coursera) and obtain a submission token, you get this from the programming assignment directly on coursera.
+
+In [1]:
+!wget https://github.com/IBM/coursera/raw/master/coursera_ml/a2.parquet
+Waiting for a Spark session to start...
+Spark Initialization Done! ApplicationId = app-20190831122534-0002
+KERNEL_ID = c4fa93e1-e6bd-4b47-bf24-52d309b7e5e1
+--2019-08-31 12:25:37--  https://github.com/IBM/coursera/raw/master/coursera_ml/a2.parquet
+Resolving github.com (github.com)... 140.82.113.3
+Connecting to github.com (github.com)|140.82.113.3|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://raw.githubusercontent.com/IBM/coursera/master/coursera_ml/a2.parquet [following]
+--2019-08-31 12:25:37--  https://raw.githubusercontent.com/IBM/coursera/master/coursera_ml/a2.parquet
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.232.8.133
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.232.8.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 59032 (58K) [application/octet-stream]
+Saving to: 'a2.parquet.2'
+
+a2.parquet.2        100%[===================>]  57.65K  --.-KB/s    in 0.002s  
+
+2019-08-31 12:25:37 (30.0 MB/s) - 'a2.parquet.2' saved [59032/59032]
+
+In [2]:
+df=spark.read.load('a2.parquet')
+
+df.createOrReplaceTempView("df")
+spark.sql("SELECT * from df").show()
++-----+-----------+-------------------+-------------------+-------------------+
+|CLASS|   SENSORID|                  X|                  Y|                  Z|
++-----+-----------+-------------------+-------------------+-------------------+
+|    0|         26| 380.66434005495194| -139.3470983812975|-247.93697521077704|
+|    0|         29| 104.74324299209692| -32.27421440203938|-25.105013725863852|
+|    0| 8589934658| 118.11469236129976| 45.916682927433534| -87.97203782706572|
+|    0|34359738398| 246.55394030642543|-0.6122810693132044|-398.18662513951506|
+|    0|17179869241|-190.32584900181487|  234.7849657520335|-206.34483804019288|
+|    0|25769803830| 178.62396382387422| -47.07529438881511|  84.38310769821979|
+|    0|25769803831|  85.03128805189493|-4.3024316644854546|-1.1841857567516714|
+|    0|34359738411| 26.786262674736566| -46.33193951911338| 20.880756008396055|
+|    0| 8589934592|-16.203752396859194| 51.080957032176954| -96.80526656416971|
+|    0|25769803852|   47.2048142440404|  -78.2950899652916| 181.99604091494786|
+|    0|34359738369| 15.608872398939273| -79.90322809181754|  69.62150711098005|
+|    0|         19|-4.8281721129789315| -67.38050508399905| 221.24876396496404|
+|    0|         54| -98.40725712852762|-19.989364074314732|  -302.695196085276|
+|    0|17179869313| 22.835845394816594|   17.1633660118843| 32.877914832011385|
+|    0|34359738454|  84.20178070080324| -32.81572075916947| -48.63517643958031|
+|    0|          0|  56.54732521345129| -7.980106018032676|  95.05162719436447|
+|    0|17179869201|  -57.6008655247749|  5.135393798773895| 236.99158698947267|
+|    0|17179869308| -65.59264738389012| -48.92660057215126| -61.58970715383383|
+|    0|25769803790|  34.82337351291005|  9.483542084393937|  197.6066372962772|
+|    0|25769803825|  39.80573823439121|-0.7955236412785212| -79.66652640650325|
++-----+-----------+-------------------+-------------------+-------------------+
+only showing top 20 rows
+
+In [3]:
+!rm -Rf a2_m1.json
+In [4]:
+df = df.repartition(1)
+df.write.json('a2_m1.json')
+In [5]:
+!rm -f rklib.py
+!wget https://raw.githubusercontent.com/IBM/coursera/master/rklib.py
+--2019-08-31 12:25:58--  https://raw.githubusercontent.com/IBM/coursera/master/rklib.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.48.133
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.48.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 2540 (2.5K) [text/plain]
+Saving to: 'rklib.py'
+
+rklib.py            100%[===================>]   2.48K  --.-KB/s    in 0s      
+
+2019-08-31 12:25:58 (73.7 MB/s) - 'rklib.py' saved [2540/2540]
+
+In [6]:
+import zipfile
+
+def zipdir(path, ziph):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file))
+
+zipf = zipfile.ZipFile('a2_m1.json.zip', 'w', zipfile.ZIP_DEFLATED)
+zipdir('a2_m1.json', zipf)
+zipf.close()
+In [7]:
+!base64 a2_m1.json.zip > a2_m1.json.zip.base64
+In [9]:
+from rklib import submit
+key = "bSH0NuYqGLTLX9iF"
+part = "wNLDt"
+email = "aditya.thaker17434@marwadieducation.edu.in"
+secret = "y501QqIPXG8byF7N"
+
+with open('a2_m1.json.zip.base64', 'r') as myfile:
+    data=myfile.read()
+submit(email, secret, key, part, [part], data)
+Submission successful, please check on the coursera grader page for the status
+-------------------------
+{"elements":[{"itemId":"O8C69","id":"f_F-qCtuEei_fRLwaVDk3g~O8C69~gcz34MvqEemwXg5NLafzvA","courseId":"f_F-qCtuEei_fRLwaVDk3g"}],"paging":{},"linked":{}}
+-------------------------
+In [ ]:
